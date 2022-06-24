@@ -1,0 +1,119 @@
+﻿//1. Liệt kê những bộ film có loại film là TV Show
+SELECT   
+   [Measures].[Fact Final Count] on COLUMNS,  
+   NON EMPTY [Dim Film].[Title].MEMBERS  ON Rows  
+FROM [NETFLIX]  
+WHERE [Dim Type].[Type1].&[TV Show]
+
+//2. Liệt kê những bộ film được ra mắt vào tháng 1/2021
+SELECT   
+   [Measures].[Fact Final Count] on COLUMNS,  
+   NON EMPTY [Dim Film].[Title].MEMBERS  ON Rows  
+FROM [NETFLIX]  
+WHERE ([Dim Date].[Added Month].&[1], [Dim Date].[Added Year].&[2021])
+
+//3. Liệt kê những bộ film có thời lượng 3 mùa
+SELECT   
+   [Measures].[Fact Final Count] on COLUMNS,  
+   NON EMPTY [Dim Film].[Title].MEMBERS  ON Rows  
+FROM [NETFLIX]  
+WHERE [Dim Film].[Duration].&[3 Seasons]
+
+//4. Liệt kê tất cả phim hành động của nước Mỹ
+SELECT   
+   [Measures].[Fact Final Count] on COLUMNS,  
+   NON EMPTY [Dim Film].[Title].MEMBERS  ON Rows  
+FROM [NETFLIX]  
+WHERE ([Dim Country].[Country].&[United States],[Dim Film].[Listed In].&[Action & Adventure])
+
+//5. In ra 5 đất nước sản xuất loại film phiêu lưu và hành động nhiều nhất
+SELECT [Measures].[Fact Final Count] on columns,
+NONEMPTY (TOPCOUNT(
+       [Dim Country].[Country].[Country].members
+        ,5
+        ,[Measures].[Fact Final Count])) on rows
+FROM [NETFLIX]
+WHERE [Dim Film].[Listed In].&[Action & Adventure]
+
+//6. In ra năm có nhiều phim nhất
+SELECT [Measures].[Fact Final Count] on columns,
+NONEMPTY (TOPCOUNT(
+       [Dim Date].[Added Year].[Added Year].members
+        ,1
+        ,[Measures].[Fact Final Count])) on rows
+FROM [NETFLIX]
+
+//7. Liệt kê những bộ phim có Rating là TV-14
+SELECT   
+   [Measures].[Fact Final Count] on COLUMNS,  
+   NON EMPTY [Dim Film].[Title].MEMBERS  ON Rows  
+FROM [NETFLIX]  
+WHERE [Dim Rating].[Rating].&[TV-14]
+
+//8. Đạo diễn có các bộ phim hành động Mỹ
+SELECT   
+   [Measures].[Fact Final Count] on COLUMNS,  
+   NON EMPTY [Dim Director].[Director].[Director].MEMBERS  ON Rows  
+FROM [NETFLIX]  
+WHERE ([Dim Country].[Country].&[United States],[Dim Film].[Listed In].&[Action & Adventure])
+
+//9. Cho biết nước nào có ít phim nhất và nước nào nhiều phim nhất
+select [Measures].[Fact Final Count] on columns,
+non empty {union(
+    TopCount([Dim Country].[Country].children,1,[Measures].[Fact Final Count]),
+    BottomCount(Filter([Dim Country].[Country].children, Not IsEmpty([Measures].[Fact Final Count]))
+                ,1
+                ,[Measures].[Fact Final Count]))
+            }on rows
+from [NETFLIX]
+
+//10. Liệt kê những mô tả của các bộ film hành động Mỹ 
+SELECT   
+   [Measures].[Fact Final Count] on COLUMNS,  
+   NON EMPTY [Dim Film].[Description].[Description].MEMBERS * [Dim Film].[Title].[Title].MEMBERS ON Rows  
+FROM [NETFLIX]  
+WHERE ([Dim Film].[Listed In].&[Action & Adventure],[Dim Country].[Country].&[United States])
+
+//11. In ra những những nước được phân loại phim theo Type
+select {nonempty([Measures].[Fact Final Count]) * nonempty([Dim Type].[Type1].children)} on columns,
+non empty {
+    DRILLDOWNLEVEL(
+        DRILLDOWNLEVEL([Dim Country].[Country].[Country]))
+} on rows
+from [NETFLIX]
+where [Dim Date].[Added Month].&[10]
+
+//12. Những TV Show được sản xuất vào năm 2021
+SELECT   
+   [Measures].[Fact Final Count] on COLUMNS,  
+   NON EMPTY [Dim Film].[Title].MEMBERS ON Rows  
+FROM [NETFLIX]  
+WHERE ([Dim Type].[Type1].&[TV Show], [Dim Date].[Added Year].&[2021])
+
+//13. Những đạo diễn sản xuất phim vào năm 2021
+SELECT   
+   [Measures].[Fact Final Count] on COLUMNS,  
+   NON EMPTY [Dim Director].[Director].MEMBERS ON Rows  
+FROM [NETFLIX]  
+WHERE [Dim Date].[Added Year].&[2021]
+
+//13. Những đạo diễn sản xuất bộ phim có loại là Movie
+SELECT   
+   [Measures].[Fact Final Count] on COLUMNS,  
+   NON EMPTY [Dim Film].[Title].[Title].MEMBERS * [Dim Director].[Director].[Director].MEMBERS ON Rows  
+FROM [NETFLIX]  
+WHERE [Dim Type].[Type1].&[Movie]
+ 
+ //14. Những bộ phim được sản xuất tại Mỹ do có loại phim là MOVIE
+ SELECT   
+   [Measures].[Fact Final Count] on COLUMNS,  
+   NON EMPTY [Dim Film].[Title].[Title].MEMBERS ON Rows  
+FROM [NETFLIX]  
+WHERE ([Dim Type].[Type1].&[Movie], [Dim Country].[Country].&[United States])
+
+//15. Những phim và đánh giá của loại phim là MOVIE
+ SELECT   
+   [Measures].[Fact Final Count] on COLUMNS,  
+   NON EMPTY [Dim Film].[Title].[Title].MEMBERS * [Dim Rating].[Rating].[Rating].MEMBERS ON Rows  
+FROM [NETFLIX]  
+WHERE [Dim Type].[Type1].&[Movie]
